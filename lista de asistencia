@@ -1,0 +1,238 @@
+function doGet(e) {
+  return HtmlService.createHtmlOutput(`
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://media.telemetro.com/p/d7592a939c6b3c5b2b4b68a43d67839d/adjuntos/311/imagenes/003/745/0003745158/1200x675/smart/universidad-especializada-las-americas-udelas-fotoudelas-universidad.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+          }
+          .container {
+            max-width: 500px;
+            width: 90%;
+            margin: 50px auto;
+            background-color: rgba(20, 20, 184, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            position: relative;
+          }
+          /* Marca de agua */
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 80%;
+            background-image: url('https://drive.google.com/uc?export=view&id=1judOpkcTdU9LNtVrfxX2Jexat9uXR_JT'); /* Imagen ajustable */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.1;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+          }
+          h3 {
+            color: #fafbfd;
+            font-size: 1.2em;
+            text-align: center;
+            margin: 0;
+          }
+          label {
+            color: #f5f5f5;
+            font-size: 1em;
+            font-weight: bold;
+          }
+          input[type="email"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.5em;
+            box-sizing: border-box;
+          }
+          button {
+            width: 100%;
+            padding: 12px;
+            background-color: #029bfa;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+          }
+          button:hover {
+            background-color: #F5AB20;
+          }
+          .message {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #f4f4f4;
+            text-align: center;
+          }
+          .confirmation {
+            background-color: #0000ff;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            display: none;
+          }
+          .image-container {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+          }
+          .bottom-image-container {
+            text-align: center;
+            margin-top: 30px;
+          }
+          img[loading="lazy"] {
+            opacity: 0;
+            transition: opacity 0.3s;
+          }
+          img[loading="lazy"]:not([src=""]) {
+            opacity: 1;
+          }
+          @media only screen and (max-width: 768px) {
+            body {
+              padding: 10px;
+            }
+            .container {
+              margin: 20px auto;
+              padding: 15px;
+            }
+            h3 {
+              font-size: 1.1em;
+            }
+            button {
+              font-size: 1em;
+            }
+            img {
+              max-width: 70%;
+            }
+          }
+          @media only screen and (max-width: 480px) {
+            h3 {
+              font-size: 1em;
+            }
+            button {
+              font-size: 0.9em;
+            }
+            img {
+              max-width: 90%;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="image-container">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrp4Oj94dymX5DmFzV1bkz_noBe9iXIV_QEw&s" alt="Imagen desde Google Drive" loading="lazy"> 
+          </div>
+          <h3>UNIVERSIDAD ESPECIALIZADA DE LAS AMÉRICAS</h3>
+          <h3>Registro de Asistencia</h3>
+          <form id="attendanceForm">
+            <label>Nombre completo:</label>
+            <input type="text" id="name" placeholder="Ingresa tu nombre completo" required>
+            
+            <label>Cédula:</label>
+            <input type="text" id="cedula" placeholder="Ingresa tu cédula: 8-888-8888" required>
+
+            <label>Acad-adm:</label>
+            <input type="text" id="acad" placeholder="Área académica, administrativa o departamento en que labora" required>
+
+            <label>Correo institucional:</label>
+            <input type="email" id="email" placeholder="Ingresa tu correo: ejemplo@udelas.ac.pa" required>
+            
+            <button type="submit">Registrar asistencia</button>
+          </form>
+          <div class="message">Por favor, ingrese su nombre, cédula, departamento/área académica o administrativa y correo institucional para registrar su asistencia.</div>
+        </div>
+        <div class="confirmation" id="confirmationMessage">
+          <p id="responseText"></p>
+        </div>
+        <div class="bottom-image-container">
+          <img src="https://drive.google.com/thumbnail?id=197S9tGz1uYhG6vtCnR2kIPU5kJeKaJIQ" alt="Imagen al final" loading="lazy">
+        </div>
+        <script>
+          document.getElementById('attendanceForm').onsubmit = function(e) {
+            e.preventDefault();
+            var name = document.getElementById('name').value;
+            var cedula = document.getElementById('cedula').value;
+            var acad = document.getElementById('acad').value;
+            var email = document.getElementById('email').value;
+
+            if (!email.endsWith("@udelas.ac.pa")) {
+              alert("Por favor, ingrese un correo institucional válido.");
+              return;
+            }
+
+            if (cedula.length < 6) {
+              alert("Por favor, ingrese una cédula válida.");
+              return;
+            }
+
+            google.script.run.withSuccessHandler(function(response) {
+              document.getElementById('responseText').textContent = response;
+              document.getElementById('confirmationMessage').style.display = 'block';
+              document.getElementById('attendanceForm').style.display = 'none';
+
+              setTimeout(function() {
+                window.location.href = "about:blank";
+              }, 2000);
+              
+            }).registerAttendance(name, cedula, acad, email);
+          }
+        </script>
+      </body>
+    </html>
+  `);
+}
+
+function registerAttendance(name, cedula, acad, email) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var currentTime = new Date();
+  var formattedDate = Utilities.formatDate(currentTime, Session.getScriptTimeZone(), "dd-MM-yyyy");
+  var formattedTime = Utilities.formatDate(currentTime, Session.getScriptTimeZone(), "HH:mm:ss");
+
+  var lastRow = sheet.getLastRow();
+  var foundDuplicate = false;
+
+  for (var i = lastRow; i >= 2; i--) {
+    var rowName = sheet.getRange(i, 1).getValue();
+    var rowCedula = sheet.getRange(i, 2).getValue();
+    var rowAcad = sheet.getRange(i, 3).getValue();
+    var rowEmail = sheet.getRange(i, 4).getValue();
+    var rowFormattedDate = sheet.getRange(i, 5).getValue();
+    
+    if (rowName === name && rowCedula === cedula && rowAcad === acad && rowEmail === email && rowFormattedDate === formattedDate) {
+      sheet.deleteRow(i);
+      foundDuplicate = true;
+    }
+  }
+
+  if (foundDuplicate) {
+    return `Ya te has registrado hoy, ${name}.`;
+  }
+
+  sheet.appendRow([name, cedula, acad, email, formattedDate, formattedTime]);
+
+  return `Hola, ${name}, con cédula ${cedula}, de ${acad}. Tu asistencia ha sido registrada exitosamente el ${formattedDate} a las ${formattedTime}.`;
+}
